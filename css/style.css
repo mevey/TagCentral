@@ -54,14 +54,14 @@ header h1 {
   outline: none;
 }
 
-.search-card a {
+/**.search-card a {
   position: absolute;
   top: 50%;
   left: 10px;
   transform: translateY(-50%);
   font-size: 25px;
   color: #888;
-}
+}**/
 
 .search-card a:hover {
   color: #444;
@@ -82,8 +82,8 @@ header h1 {
 
 .tags a {
   text-decoration: none;
-  background: #ff6a5d;
-  padding: 10px 20px;
+  background: brown;
+  padding: 5px 8px;
   box-shadow: 0 2px 5px #888;
   color: #fff;
   transition: all 0.5s;
@@ -101,59 +101,6 @@ header h1 {
     font-weight:300;
     font-size:12px;
 }
-
-.content {
-  width: 50%;
-  margin-top: 50px;
-  display: flex;
-  flex-direction: column;
-}
-
-.content .loading {
-  text-align: center;
-  font-size: 32px;
-  color: #888;
-  display: none;
-}
-
-.content .loading p {
-  font-size: 16px;
-}
-
-.content .result {
-  width: 100%;
-  padding: 10px 0 0 0;
-  margin-bottom: 30px;
-}
-
-.result .title {
-  text-align: center;
-  margin: 10px 0;
-}
-
-.result .snippet {
-  padding: 0 10px 10px 10px;
-  text-align: center;
-  letter-spacing: 2px;
-}
-
-.result .read-more-link {
-  border-top: 1px solid #ccc;
-  padding: 10px 0;
-  display: block;
-  width: 100%;
-  text-align: center;
-  text-decoration: none;
-  color: #ff6600;
-  font-size: 18px;
-  font-weight: bolder;
-  transition: all 0.5s;
-}
-
-.result .read-more-link:hover {
-  background: #f9f9f9;
-}
-
 .error {
   position: absolute;
   top: 10px;
@@ -192,9 +139,6 @@ form {
     font-size: 62px;
     margin-bottom: 10px
   }
-  .content {
-    width: 70%;
-  }
   .card {
     width: 90%;
   }
@@ -208,9 +152,6 @@ form {
     font-size: 42px;
     margin-top: 10px;
     margin-bottom: 10px
-  }
-  .content {
-    width: 90%;
   }
   .search-card {
     width: 90%;

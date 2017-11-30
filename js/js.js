@@ -32,16 +32,9 @@ $(document).ready(function() {
       },
       success: function(result, status, xhr) {
         console.log(result);
-
-        //console.log(resultArr);
-        for (var i = 0; i < result[1].length; i++) {
-          var title = result[1][i];
-          var snippet = result[2][i];
-          var url = result[3][i];
-          var el = '<div class="card result animated fadeIn"><h2 class="title">' + title + '</h2><div class="snippet">' + snippet + '</div><a href="' + url + '"class="read-more-link" target="_blank">Read More</a></div>';
-          // console.log(el);
-          $('.content').append(el);
-        }
+        $('.chosen-tags').append('<a href="#" target="_blank">'+ result[0] +' <span>X</span></a>')
+        $('#wiki-search').val('')
+        $('#wiki-search').focus()
       },
       error: function(xhr, status, error) {
         console.log(error);
