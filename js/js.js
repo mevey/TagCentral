@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-  var wikiApiUrl = 'http://en.wikipedia.org/w/api.php';
+  var wikiApiUrl = 'https://en.wikipedia.org/w/api.php';
   var template = '<div class="card result"><h2 class="title">{{title}}</h2><div class="snippet">{{snippet}}</div><a href="{{url}}" class="read-more-link">Read More</a></div>';
 
   //handels error to update ui
