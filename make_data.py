@@ -1,9 +1,34 @@
+# coding: utf-8
+
+# # Tag Central
+# Here we will manipulate data from the data folder(US Election tags and Twitch plays pokemon tags).
+# 
+
+# In[16]:
+
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.cluster import AffinityPropagation
 import numpy as np
 import pandas as pd
 import json
+
+# In[17]:
+
+
+#twitch_data = pd.read_csv("data/Twitch Plays Pokemon Identifiers.csv", low_memory=False, encoding="ISO-8859-1")
+election_data = pd.read_csv("../data/US Election Identifiers.csv", low_memory=False, encoding="ISO-8859-1")
+
+DATA = election_data
+
+
+# Twitch data and election data are loaded using panda.
+# Each dataset has two columns **Identifier** and **Subject**
+# The __tokenize_tags__ function below takes each row of tags, splits them up into arrays and puts them all together into a tags array.
+
+# In[18]:
+
 
 def tokenize_tags(data):
     tags = data['Subject']
@@ -14,9 +39,32 @@ def tokenize_tags(data):
     all_tags = np.asarray(all_tags)
     return all_tags
 
+
+TAGS = tokenize_tags(DATA)
+print(list(TAGS[0:10]))
+print("Total number of tags", len(TAGS))
+
+# ## Inverted Index
+# Here we are preparing an inverted index of our tags and identifiers
+
+# First, we convert the dataframe to a dictionary. The key is the identifier and the  the value is a string of comma separated tags.
+# The **make_inverted_index** function that converts this dictionary into a dictionary where the key is a tag and the value is a list of documents where is occurs. The documents are labelled by their position. e.g. 0,1,2,3. This is much easier to work with than their longer values e.g. live_user_twitchplayspokemon_1407024801
+# 
+# We create the popularity index and inverted index at the same time.
+
+# In[19]:
+
+
+# Run this just once.this converts the csv data into a dictionary
+DATA = DATA.set_index('Identifier').T.to_dict('list')
+
+
+# In[20]:
+
+
 def cleanup(word):
     if (word == None):
-            print("Fingerprint keyer accepts a single string parameter")
+        print("Fingerprint keyer accepts a single string parameter")
     # remove whitespace around the string
     word = word.strip()
     # lowercase the string
@@ -25,102 +73,112 @@ def cleanup(word):
     word = ''.join(e for e in word if e.isalnum())
     # finds ASCII equivalent, per https://stackoverflow.com/questions/21701968/python-the-standard-library-ascii-function
     # not sure if the ascii() function is needed, leaving out to test
-    word = ascii(word)
+    # word = ascii(word)
     # splits the word by whitespace, per https://www.tutorialspoint.com/python/string_split.htm
     word = word.split()
-    #sort words
-    word = sorted(word)
     # removes duplicates
     word = "".join(list(set(word)))
-    # sorts array in place
-    return word.strip("'")
-
-# def make_inverted_index(data):
-#     inverted_index = {}
-#     popularity_index = {}
-#     for i, doc in enumerate(data):
-#         try:
-#             doc_tags = str(data[doc][0]).split(",")
-#         except:
-#             continue
-#         for tag in doc_tags:
-#             tag = strip_non_ascii(tag.strip())
-#             if inverted_index.get(tag, None):
-#                 inverted_index[tag].append(i)
-#                 popularity_index[tag] += 1
-#             else:
-#                 inverted_index[tag] = [i]
-#                 popularity_index[tag] = 1
-#     with open('inverted_index_elections.py', 'w') as file:
-#         file.write("INVERTED_INDEX = ")
-#         file.write(json.dumps(inverted_index))
-#         file.write("\n")
-#         file.write("POPULARITY_INDEX = ")
-#         file.write(json.dumps(popularity_index))
-#     return inverted_index, popularity_index
+    # sorts array in place 
+    return word
 
 
+# In[21]:
 
-def make_inverted_index(data, clustered_tags):
+
+def make_inverted_index(data):
     inverted_index = {}
     popularity_index = {}
     for i, doc in enumerate(data):
         doc_tags = str(data[doc][0]).split(",")
         for tag in doc_tags:
-            for clustered_tag in clustered_tags:
-                arr = clustered_tags.get(clustered_tag, None)
-                if arr:  arr.append(clustered_tag)
-                else:continue
-                if tag in arr:
-                    if inverted_index.get(tag, None):
-                        inverted_index[tag].append(i)
-                        popularity_index[tag] += 1
-                    else:
-                        inverted_index[tag] = [i]
-                        popularity_index[tag] = 1
-                    break
-    with open('inverted_index_elections.py', 'w') as file:
-        file.write("INVERTED_INDEX = ")
-        file.write(json.dumps(inverted_index))
-        file.write("\n")
-        file.write("POPULARITY_INDEX = ")
-        file.write(json.dumps(popularity_index))
+            if inverted_index.get(tag, None):
+                inverted_index[tag].append(i)
+                popularity_index[tag] += 1
+            else:
+                inverted_index[tag] = [i]
+                popularity_index[tag] = 1
     return inverted_index, popularity_index
 
-def cluster(data, tags, clean_tags):
-    affprop = AffinityPropagation(preference=100)
-    affprop.fit(data)
-    clustered_tags = {}
-    for cluster_id in np.unique(affprop.labels_):
-        exemplar = cleaned_tags[affprop.cluster_centers_indices_[cluster_id]].lower()
-        if exemplar in list(clustered_tags.keys()):
-            arr = clustered_tags[exemplar]
-        else:
-            arr = []
-        cluster = np.unique(tags[np.nonzero(affprop.labels_==cluster_id)])
-        arr.extend(cluster.tolist())
-        clustered_tags[exemplar] =  list(set(arr))
-        cluster_str = ", ".join(cluster)
-    print("No, of labels", len(clustered_tags.keys()))
-    return clustered_tags
 
-def strip_non_ascii(string):
-    ''' Returns the string without non ASCII characters'''
-    stripped = (c for c in string if 0 < ord(c) < 127)
-    return ''.join(stripped)
+# In[22]:
 
-if __name__ == "__main__":
 
-    # DATA = pd.read_csv("data/Twitch Plays Pokemon Identifiers.csv", low_memory=False, encoding="ISO-8859-1")
-    DATA = pd.read_csv("data/US Election Identifiers.csv", low_memory=False, encoding="utf-8")
-    # DATA = pd.read_csv("data/television.csv", low_memory=False, encoding="utf-8")
-    TAGS = tokenize_tags(DATA)
-    cleaned_tags = [cleanup(tag) for tag in TAGS]
+def make_inverted_index_clean(data):
+    inverted_index = {}
+    popularity_index = {}
+    for i, doc in enumerate(data):
+        doc_tags = str(data[doc][0]).split(",")
+        for tag in doc_tags:
+            tag = cleanup(tag)  # CLEANUP OCCURS HERE
+            if inverted_index.get(tag, None):
+                inverted_index[tag].append(i)
+                popularity_index[tag] += 1
+            else:
+                inverted_index[tag] = [i]
+                popularity_index[tag] = 1
+    return inverted_index, popularity_index
 
-    tfidf_vectorizer = TfidfVectorizer()
-    tfidf_matrix = tfidf_vectorizer.fit_transform(cleaned_tags)
-    cs_similarity = np.array([cosine_similarity(tfidf_matrix[i:i + 1], tfidf_matrix).flatten() for i in range(len(cleaned_tags))])
-    clustered_tags = cluster(cs_similarity, TAGS, cleaned_tags)
 
-    DATA = DATA.set_index('Identifier').T.to_dict('list')
-    make_inverted_index(DATA, clustered_tags)
+# In[23]:
+
+
+# Generate clean and dirty indices
+inverted_index, popularity_index = make_inverted_index(DATA)
+inverted_index_clean, popularity_index_clean = make_inverted_index_clean(DATA)
+with open('inverted_index_elections.py', 'w') as file:
+    file.write("INVERTED_INDEX = ")
+    file.write(json.dumps(inverted_index))
+    file.write("\n")
+    file.write("INVERTED_INDEX_CLEAN = ")
+    file.write(json.dumps(inverted_index_clean))
+    file.write("\n")
+    file.write("POPULARITY_INDEX = ")
+    file.write(json.dumps(popularity_index))
+
+# In[24]:
+
+
+def recommendOriginal(invIndex, invIndexClean, query):
+    """Take an input of a partial string (e.g. 'Tru').
+    Clean input.
+    Access inverted index to find matching (cleaned) tags.
+    Figure out which matching cleaned tags are most popuar.
+    Recommend uncleaned version of most popular tag."""
+    cleanQuery = cleanup(query)
+    matchList = []
+    # Find all clean tags that match the clean query
+    for tag in invIndexClean:
+        if cleanQuery in tag:
+            matchList.append([tag, len(invIndexClean[tag])])
+    # print("matchList:", matchList)
+    # find most popular tag in matchList
+    highest = 0
+    topRecClean = ""
+    for (tag, popularity) in matchList:
+        # print("tag:", tag, "popularity:", popularity)
+        if popularity > highest:
+            highest = popularity
+            topRecClean = tag
+    # print(topRecClean)
+    # print(highest)
+
+    # What is original version of topRec with the highest popularity?
+    # Data is dictionary of element:tags
+    # Look in the dirty index
+    # Find the multiple tags that clean to cleanquery
+    # Recommend the most popular one
+    dirtyMatches = []
+    topRecDirty = ""
+    highestDirty = 0
+
+    for tag in invIndex:
+        if topRecClean == cleanup(tag):
+            dirtyMatches.append([tag, len(invIndex[tag])])
+
+    # print("Dirty matches:", dirtyMatches)
+    for (tag, popularity) in dirtyMatches:
+        if popularity > highestDirty:
+            highestDirty = popularity
+            dirtyRec = tag
+    return dirtyRec
+
