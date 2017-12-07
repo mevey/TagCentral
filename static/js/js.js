@@ -1,7 +1,8 @@
 $(document).ready(function() {
   $('#wiki-search').focus()
 
-  var wikiApiUrl = 'https://en.wikipedia.org/w/api.php';
+  var recommendationURL = 'http://127.0.0.1:5000/r';
+  var autocompleteURL = 'http://127.0.0.1:5000/ac'
   var template = '<div class="card result"><h2 class="title">{{title}}</h2><div class="snippet">{{snippet}}</div><a href="{{url}}" class="read-more-link">Read More</a></div>';
 
   //handels error to update ui
@@ -15,13 +16,7 @@ $(document).ready(function() {
   //sends ajax request to wiki api to get results
   function wikiRequest(query) {
     $.ajax({
-      url: wikiApiUrl,
-      data: {
-        action: 'opensearch',
-        search: query,
-        format: 'json'
-      },
-      dataType: 'jsonp',
+      url: recommendationURL + '?q=' + query,
       beforeSend: function(xhr) {
         console.log('Before: ' + xhr);
         $('.result').remove();
@@ -32,8 +27,23 @@ $(document).ready(function() {
         $('.content .loading').hide();
       },
       success: function(result, status, xhr) {
-        console.log(result);
-        $('.chosen-tags').append('<a href="#" target="_blank">'+ result[0] +' <span>X</span></a>')
+        $('.suggestions').html("")
+        $('.chosen-tags').append('<a href="#">'+ result.query +' <span>X</span></a>')
+        arr = result.results[0]
+        for (var i = 0; i < arr.length; i++) {
+            $('.suggestions').append('<a href="#">'+ arr[i] +' <span>X</span></a>')
+        }
+        $('.suggestions a').click(function() {
+            val = $(this).html().replace("<span>X</span>","")
+             $('.chosen-tags').append('<a href="#">'+ val +' <span>X</span></a>')
+             $(this).css("display","none")
+             //$('.suggestions').html("")
+             //wikiRequest(val)
+        })
+        $('.chosen-tags a').click(function() {
+            $(this).css("display","none")
+            $('.suggestions').html("")
+        })
         $('#wiki-search').val('')
         $('#wiki-search').focus()
       },
@@ -68,26 +78,21 @@ $(document).ready(function() {
   $('#wiki-search').autocomplete({
     lookup: function(query, done) {
       $.ajax({
-        url: wikiApiUrl,
-        data: {
-          action: 'query',
-          list: 'search',
-          srsearch: query,
-          format: 'json'
-        },
-        dataType: 'jsonp',
-
+        url: autocompleteURL + '?q=' + query,
+        //delay: 2000,
         success: function(data) {
+          console.log("Done")
+          //data = JSON.parse(data)
           console.log(data);
-          var results = data.query.search
+          var results = data.results
           results.sort(function(a, b) {
-            return a.title.localeCompare(b.title);
+            return a.localeCompare(b);
           })
 
           data = {
             suggestions: results.map(function(item, index) {
               return {
-                value: item.title,
+                value: item,
                 data: index
               };
             })
