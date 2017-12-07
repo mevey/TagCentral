@@ -26,7 +26,7 @@ def get_similar_tags(tag, inverted_index, inverted_index_clean, numRec):
     similar_tags = [array_of_tags[i] for i in most_similar_tags]
     similar_Original_tags = []
     for tag in similar_tags:
-        similar_Original_tags.append(recommendOriginal(inverted_index, inverted_index_clean, tag))
+        similar_Original_tags.append(recommendOriginal(inverted_index, tag))
     return similar_Original_tags[1:]
 
 
@@ -49,12 +49,14 @@ def cleanup(word):
     # sorts array in place
     return word
 
-def recommendOriginal(invIndex, invIndexClean, query):
+
+def recommendOriginal(invIndex, topRecClean):
     """Take an input of a partial string (e.g. 'Tru').
     Clean input.
     Access inverted index to find matching (cleaned) tags.
     Figure out which matching cleaned tags are most popuar.
     Recommend uncleaned version of most popular tag."""
+    """
     cleanQuery = cleanup(query)
     matchList = []
     # Find all clean tags that match the clean query
@@ -72,20 +74,20 @@ def recommendOriginal(invIndex, invIndexClean, query):
             topRecClean = tag
     # print(topRecClean)
     # print(highest)
-
+    """
     # What is original version of topRec with the highest popularity?
     # Data is dictionary of element:tags
     # Look in the dirty index
     # Find the multiple tags that clean to cleanquery
     # Recommend the most popular one
     dirtyMatches = []
-    topRecDirty = ""
     highestDirty = 0
 
     for tag in invIndex:
         if topRecClean == cleanup(tag):
             dirtyMatches.append([tag, len(invIndex[tag])])
 
+    dirtyRec = None
     # print("Dirty matches:", dirtyMatches)
     for (tag, popularity) in dirtyMatches:
         if popularity > highestDirty:
@@ -95,4 +97,3 @@ def recommendOriginal(invIndex, invIndexClean, query):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port="6000", debug=True)
-

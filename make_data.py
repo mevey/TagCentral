@@ -2,7 +2,7 @@
 
 # # Tag Central
 # Here we will manipulate data from the data folder(US Election tags and Twitch plays pokemon tags).
-# 
+#
 
 # In[16]:
 
@@ -18,7 +18,7 @@ import json
 
 
 #twitch_data = pd.read_csv("data/Twitch Plays Pokemon Identifiers.csv", low_memory=False, encoding="ISO-8859-1")
-election_data = pd.read_csv("../data/US Election Identifiers.csv", low_memory=False, encoding="ISO-8859-1")
+election_data = pd.read_csv("data/US Election Identifiers.csv", low_memory=False, encoding="ISO-8859-1")
 
 DATA = election_data
 
@@ -49,7 +49,7 @@ print("Total number of tags", len(TAGS))
 
 # First, we convert the dataframe to a dictionary. The key is the identifier and the  the value is a string of comma separated tags.
 # The **make_inverted_index** function that converts this dictionary into a dictionary where the key is a tag and the value is a list of documents where is occurs. The documents are labelled by their position. e.g. 0,1,2,3. This is much easier to work with than their longer values e.g. live_user_twitchplayspokemon_1407024801
-# 
+#
 # We create the popularity index and inverted index at the same time.
 
 # In[19]:
@@ -78,7 +78,7 @@ def cleanup(word):
     word = word.split()
     # removes duplicates
     word = "".join(list(set(word)))
-    # sorts array in place 
+    # sorts array in place
     return word
 
 
@@ -134,51 +134,8 @@ with open('inverted_index_elections.py', 'w') as file:
     file.write("\n")
     file.write("POPULARITY_INDEX = ")
     file.write(json.dumps(popularity_index))
+    file.write("\n")
+    file.write("POPULARITY_INDEX_CLEAN = ")
+    file.write(json.dumps(popularity_index_clean))
 
 # In[24]:
-
-
-def recommendOriginal(invIndex, invIndexClean, query):
-    """Take an input of a partial string (e.g. 'Tru').
-    Clean input.
-    Access inverted index to find matching (cleaned) tags.
-    Figure out which matching cleaned tags are most popuar.
-    Recommend uncleaned version of most popular tag."""
-    cleanQuery = cleanup(query)
-    matchList = []
-    # Find all clean tags that match the clean query
-    for tag in invIndexClean:
-        if cleanQuery in tag:
-            matchList.append([tag, len(invIndexClean[tag])])
-    # print("matchList:", matchList)
-    # find most popular tag in matchList
-    highest = 0
-    topRecClean = ""
-    for (tag, popularity) in matchList:
-        # print("tag:", tag, "popularity:", popularity)
-        if popularity > highest:
-            highest = popularity
-            topRecClean = tag
-    # print(topRecClean)
-    # print(highest)
-
-    # What is original version of topRec with the highest popularity?
-    # Data is dictionary of element:tags
-    # Look in the dirty index
-    # Find the multiple tags that clean to cleanquery
-    # Recommend the most popular one
-    dirtyMatches = []
-    topRecDirty = ""
-    highestDirty = 0
-
-    for tag in invIndex:
-        if topRecClean == cleanup(tag):
-            dirtyMatches.append([tag, len(invIndex[tag])])
-
-    # print("Dirty matches:", dirtyMatches)
-    for (tag, popularity) in dirtyMatches:
-        if popularity > highestDirty:
-            highestDirty = popularity
-            dirtyRec = tag
-    return dirtyRec
-

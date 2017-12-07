@@ -28,17 +28,21 @@ $(document).ready(function() {
       },
       success: function(result, status, xhr) {
         $('.suggestions').html("")
-        $('.chosen-tags').append('<a href="#">'+ result.query +' <span>X</span></a>')
+        $('.chosen-tags').append('<a>'+ result.query +' <span>X</span></a>')
         arr = result.results[0]
         for (var i = 0; i < arr.length; i++) {
-            $('.suggestions').append('<a href="#">'+ arr[i] +' <span>X</span></a>')
+            $('.suggestions').append('<a>'+ arr[i] +' <span>X</span></a>')
         }
         $('.suggestions a').click(function() {
             val = $(this).html().replace("<span>X</span>","")
-             $('.chosen-tags').append('<a href="#">'+ val +' <span>X</span></a>')
+             $('.chosen-tags').append('<a>'+ val +' <span>X</span></a>')
              $(this).css("display","none")
              //$('.suggestions').html("")
              //wikiRequest(val)
+             $('.chosen-tags a').click(function() {
+                 $(this).css("display","none")
+                 $('.suggestions').html("")
+             })
         })
         $('.chosen-tags a').click(function() {
             $(this).css("display","none")
