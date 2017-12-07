@@ -85,9 +85,9 @@ $(document).ready(function() {
           //data = JSON.parse(data)
           console.log(data);
           var results = data.results
-          results.sort(function(a, b) {
-            return a.localeCompare(b);
-          })
+//          results.sort(function(a, b) {
+//            return a.localeCompare(b);
+//          })
 
           data = {
             suggestions: results.map(function(item, index) {
